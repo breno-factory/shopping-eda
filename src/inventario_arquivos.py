@@ -1,10 +1,27 @@
 from pathlib import Path
+import argparse
 import pandas as pd
 from datetime import datetime
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-BASE_DIR = PROJECT_ROOT / "data" / "raw" / "iguatemi"
-OUTPUT_DIR = PROJECT_ROOT / "metadata"
+
+
+def obter_argumentos():
+    parser = argparse.ArgumentParser(description="Gera inventário de arquivos por empresa.")
+    parser.add_argument(
+        "--empresa",
+        required=True,
+        choices=["iguatemi", "multiplan", "allos", "jhsf"],
+        help="Empresa a ser inventariada."
+    )
+    return parser.parse_args()
+
+
+args = obter_argumentos()
+empresa = args.empresa
+
+BASE_DIR = PROJECT_ROOT / "data" / "raw" / empresa
+OUTPUT_DIR = PROJECT_ROOT / "metadata" / empresa
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 registros = []
@@ -19,7 +36,7 @@ for arquivo in BASE_DIR.rglob("*"):
         stat = arquivo.stat()
 
         registros.append({
-            "empresa": "iguatemi",
+            "empresa": empresa,
             "ano": ano,
             "tipo_material": tipo_material,
             "nome_arquivo": arquivo.name,
@@ -32,17 +49,19 @@ for arquivo in BASE_DIR.rglob("*"):
 
 df = pd.DataFrame(registros)
 
-df = df.sort_values(
-    by=["ano", "tipo_material", "nome_arquivo"],
-    na_position="last"
-).reset_index(drop=True)
+if not df.empty:
+    df = df.sort_values(
+        by=["ano", "tipo_material", "nome_arquivo"],
+        na_position="last"
+    ).reset_index(drop=True)
 
-csv_path = OUTPUT_DIR / "inventario_iguatemi.csv"
-parquet_path = OUTPUT_DIR / "inventario_iguatemi.parquet"
+csv_path = OUTPUT_DIR / f"inventario_{empresa}.csv"
+parquet_path = OUTPUT_DIR / f"inventario_{empresa}.parquet"
 
 df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 df.to_parquet(parquet_path, index=False)
 
+print(f"Empresa: {empresa}")
 print(f"Inventário gerado com {len(df)} arquivos.")
 print(f"CSV: {csv_path}")
 print(f"Parquet: {parquet_path}")

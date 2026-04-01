@@ -1,44 +1,30 @@
-# POC RI Shopping Centers – Iguatemi
+# POC RAG – RI Shopping Centers
 
-## Objetivo
-Esta POC permite fazer perguntas em linguagem natural sobre materiais de RI da Iguatemi usando busca semântica local.
+## 📌 Objetivo
+Explicação simples do projeto
 
-## O que foi feito
-- inventário dos arquivos
-- extração de texto dos documentos
-- chunking do conteúdo
-- indexação no ChromaDB
-- interface Streamlit para consulta
+## 🧠 Como funciona
+Pipeline:
+- extração
+- chunking
+- embeddings
+- busca vetorial
+- reranking
 
-## Estrutura principal
-- `app.py` → interface Streamlit
-- `src/` → scripts do pipeline
-- `data/raw/iguatemi/` → arquivos brutos
-- `data/processed/iguatemi/chroma_db/` → base vetorial
-- `metadata/` → inventário dos arquivos
+## ⚙️ Tecnologias
+- Python
+- Chroma
+- Streamlit
+- pytest
 
-## Ambiente
-- WSL Ubuntu
-- Miniconda
-- Python 3.11
-- ambiente `iguatemi-poc`
+## 🚀 Como rodar
+passo a passo
 
-## Tecnologias
-Python
-Streamlit
-ChromaDB
-Sentence Transformers
-Docling
-Pandas
+## 📂 Estrutura do projeto
 
+## 🧪 Testes
 
-## Status
-42 arquivos inventariados
-31 documentos processados
-2621 chunks gerados
-interface final funcionando
+## 🔍 Exemplos de perguntas
 
-## Exemplos de perguntas
-- Quais foram os principais resultados do 4T24?
-- O que a teleconferência do 4T24 falou sobre estratégia?
-- Quais pontos financeiros aparecem no ITR do 2T24?
+## 💡 Diferenciais
+(re-ranking!)

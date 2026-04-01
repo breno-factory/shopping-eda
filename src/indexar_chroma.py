@@ -3,13 +3,32 @@ import sys
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
 from pathlib import Path
+import argparse
 import pandas as pd
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-INPUT_PATH = PROJECT_ROOT / "data" / "processed" / "iguatemi" / "documentos_chunkados_iguatemi.parquet"
-CHROMA_DIR = PROJECT_ROOT / "data" / "processed" / "iguatemi" / "chroma_db"
+
+
+def obter_argumentos():
+    parser = argparse.ArgumentParser(description="Indexa chunks no Chroma por empresa.")
+    parser.add_argument(
+        "--empresa",
+        required=True,
+        choices=["iguatemi", "multiplan", "allos", "jhsf"],
+        help="Empresa a ser indexada."
+    )
+    return parser.parse_args()
+
+
+args = obter_argumentos()
+empresa = args.empresa
+
+INPUT_PATH = PROJECT_ROOT / "data" / "processed" / empresa / f"documentos_chunkados_{empresa}.parquet"
+CHROMA_DIR = PROJECT_ROOT / "data" / "processed" / empresa / "chroma_db"
+COLLECTION_NAME = f"{empresa}_ri"
 
 df = pd.read_parquet(INPUT_PATH)
 
@@ -23,7 +42,7 @@ embedding_fn = SentenceTransformerEmbeddingFunction(
 )
 
 collection = client.get_or_create_collection(
-    name="iguatemi_ri",
+    name=COLLECTION_NAME,
     embedding_function=embedding_fn
 )
 
@@ -42,7 +61,6 @@ for _, row in df.iterrows():
         "chunk_index": int(row["chunk_index"]),
     })
 
-# limpa e recria os dados da collection
 existing = collection.count()
 if existing > 0:
     batch = collection.get(include=[])
@@ -58,5 +76,8 @@ for i in range(0, len(ids), batch_size):
         metadatas=metadatas[i:i + batch_size]
     )
 
+print(f"Empresa: {empresa}")
 print(f"Chunks indexados no Chroma: {collection.count()}")
+print(f"Arquivo de entrada: {INPUT_PATH}")
 print(f"Diretório do banco: {CHROMA_DIR}")
+print(f"Collection: {COLLECTION_NAME}")

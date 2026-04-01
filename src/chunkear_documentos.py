@@ -1,13 +1,23 @@
 from pathlib import Path
+import argparse
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-INPUT_PATH = PROJECT_ROOT / "data" / "processed" / "iguatemi" / "documentos_extraidos_iguatemi.parquet"
-OUTPUT_DIR = PROJECT_ROOT / "data" / "processed" / "iguatemi"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 CHUNK_SIZE = 1200
 CHUNK_OVERLAP = 200
+
+
+def obter_argumentos():
+    parser = argparse.ArgumentParser(description="Gera chunks dos documentos extraídos por empresa.")
+    parser.add_argument(
+        "--empresa",
+        required=True,
+        choices=["iguatemi", "multiplan", "allos", "jhsf"],
+        help="Empresa a ser processada."
+    )
+    return parser.parse_args()
+
 
 def chunk_text(texto: str, chunk_size: int = 1200, chunk_overlap: int = 200):
     if not texto or not isinstance(texto, str):
@@ -35,6 +45,14 @@ def chunk_text(texto: str, chunk_size: int = 1200, chunk_overlap: int = 200):
 
     return chunks
 
+
+args = obter_argumentos()
+empresa = args.empresa
+
+INPUT_PATH = PROJECT_ROOT / "data" / "processed" / empresa / f"documentos_extraidos_{empresa}.parquet"
+OUTPUT_DIR = PROJECT_ROOT / "data" / "processed" / empresa
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 df = pd.read_parquet(INPUT_PATH)
 
 registros = []
@@ -59,12 +77,13 @@ for _, row in df.iterrows():
 
 df_chunks = pd.DataFrame(registros)
 
-parquet_path = OUTPUT_DIR / "documentos_chunkados_iguatemi.parquet"
-csv_path = OUTPUT_DIR / "documentos_chunkados_iguatemi.csv"
+parquet_path = OUTPUT_DIR / f"documentos_chunkados_{empresa}.parquet"
+csv_path = OUTPUT_DIR / f"documentos_chunkados_{empresa}.csv"
 
 df_chunks.to_parquet(parquet_path, index=False)
 df_chunks.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
+print(f"Empresa: {empresa}")
 print(f"Chunks gerados: {len(df_chunks)}")
 print(f"CSV: {csv_path}")
 print(f"Parquet: {parquet_path}")

@@ -8,3 +8,5 @@ pypdf
 python-docx
 openpyxl
 tqdm
+pytest
+pysqlite3-binary

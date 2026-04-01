@@ -151,7 +151,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
         if tipo == "itr_dfp":
             score += 2.0
 
-    # Boost por seções executivas
     boosts_fortes = {
         "destaques dos resultados": 2.0,
         "principais destaques": 1.8,
@@ -170,7 +169,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
         if termo in texto:
             score += peso
 
-    # Boost por palavras-chave da pergunta presentes no chunk
     palavras_importantes = [
         "vendas", "sss", "sas", "ocupação", "ocupacao",
         "aluguel", "ebitda", "receita", "margem",
@@ -180,7 +178,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
         if termo in pergunta_l and termo in texto:
             score += 0.8
 
-    # Penalização por seções de baixo valor para perguntas executivas
     penalidades_fortes = [
         "sumário", "sumario", "índice", "indice",
         "anexo", "anexos", "apêndice", "apendice",
@@ -200,7 +197,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
         if termo in texto:
             score -= 0.7
 
-    # Penalização específica para chunks com cara de índice/sumário
     linhas_indice = contar_linhas_indice(texto)
 
     if parece_sumario(texto):
@@ -211,7 +207,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
     if linhas_indice >= 8:
         score -= 3.0
 
-    # Penalizar chunks excessivamente tabulares
     digitos = proporcao_digitos(texto)
     linhas_tabeladas = contar_linhas_tabeladas(texto)
 
@@ -224,7 +219,6 @@ def score_chunk(pergunta: str, meta: dict, doc: str, dist: float) -> float:
     if linhas_tabeladas > 30:
         score -= 1.8
 
-    # Pequeno boost para chunks mais narrativos
     if 400 <= len(doc) <= 1600:
         score += 0.4
 
